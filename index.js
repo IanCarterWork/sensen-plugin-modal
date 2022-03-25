@@ -80,7 +80,8 @@ export default function SensenPluginModal(content, parameter) {
             $this.setAttribute('ui-fx', 'transition');
             $this.setAttribute('fx-global', '');
             $this.SetContent(content);
-            setTimeout(() => $this.setAttribute('plugin:status', '1'), 60);
+            $this.setAttribute('plugin:status', '1');
+            // setTimeout(()=> $this.setAttribute('plugin:status', '1') , 1)
             return $this;
         });
         modal.$assign('WhenMutationsDetected', (records) => {

@@ -213,8 +213,7 @@ export default function SensenPluginModal(content : any, parameter? : SensenPlug
             $this.SetContent(content);
 
 
-            $this.setAttribute('plugin:status', '1');
-            // setTimeout(()=> $this.setAttribute('plugin:status', '1') , 1)
+            setTimeout(()=> $this.setAttribute('plugin:status', '1') , 20)
 
             return $this
             
