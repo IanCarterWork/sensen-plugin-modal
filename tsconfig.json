@@ -16,6 +16,8 @@
       "module": "ES2020",
       "esModuleInterop": true,
       "types": ["node"], 
+      // "outDir": "sandbox",
+      // "rootDir": "./",
   },
 
   "include": [
@@ -23,5 +25,12 @@
     "./node_modules/sensen-jutsu/framework.d.ts", 
     "./node_modules/sensen-plugin-element/**/*",
   ],
+
+  "exclude": [
+    "./sandbox",
+    "./sandbox/**/*",
+    "./dev/**/*",
+    "./webpack.config.js"
+  ]
 
 }

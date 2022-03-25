@@ -1,35 +1,121 @@
 
 import { Sensen, SensenActivity, SensenComponent, SensenElement, SensenPlugin } from "sensen-jutsu";
-import SensenPluginElement from "sensen-plugin-element"
-import { PluginChild } from "sensen-jutsu/plugin"
+import SensenPluginElement from "sensen-plugin-element";
+import { GetPluginChild, PluginChild } from "sensen-jutsu/plugin";
+
+
+
+
+
+
+
+
+
+export const ModalAppearence : TAppearanceProps = {
+
+    $self:{
+
+        position: 'fixed',
+
+        zIndex: '910',
+
+        backgroundColor: 'var(--color-layer-rgb-big)',
+        
+
+    },
+
+
+
+    '&, &[plugin\\:status="0"]': {
+
+        transform: 'translateY(100%)',
+
+        opacity: '0.0',
+    },
+
+
+
+    '&, &[plugin\\:status="1"]': {
+
+        transform: 'translateY(0%)',
+
+        opacity: '1',
+    },
+
+
+    '[plugin-child="@overlay"]': {
+        
+        opacity: '0.0',
+
+        transform: 'translateY(10%)',
+
+    },
+
+
+
+    '&[plugin\\:status="1"] [plugin-child="@overlay"]' : {
+        
+        opacity: '1',
+
+        transitionDelay: 'calc( var(--fx-duration) - ( var(--fx-duration) / 90 ) )',
+        
+        transform: 'translateY(0%)',
+
+    },
+
+
+
+    '&, [plugin-child="@underlay"]' : {
+
+        display: 'flex',
+    
+        justifyContent: 'center',
+    
+        alignItems: 'center',
+    
+        flexDirection: 'column',
+
+        top: '0', 
+        
+        left: '0',
+
+        width: '100vw',
+    
+        height: '100vh',
+    
+    },
+
+
+    '[plugin-child="@underlay"]' : {
+
+        position: 'absolute'
+
+    }
+
+
+}
+
+
+
 
 
 
 interface SensenModalElement extends SensenElement<SensenPluginModalState> {
 
-    Open(): this
+    Open(): this;
 
-    Close(): this
-    
-}
+    SetContent(content : any): this;
 
+    BuildParameters(): this;
 
+    WhenMutationsDetected(records : MutationRecord[]): this;
 
-
-export const IModalAppearence : TAppearanceProps = {
-
-    // $self:{
-    //     position:'fixed',
-    //     top:'0',
-    //     left:'0',
-    //     minWidth: '100%',
-    //     minHeight: '100%',
-    //     maxWidth: '100vw',
-    //     maxHeight: '100vh',
-    //     backgroundColor: "var(--color-layer-rgb-large)"
-    // }
+    Close(): void;
 
 }
+
+
+
 
 
 const IModalElement = SensenPluginElement<SensenPluginModalState>({
@@ -44,7 +130,7 @@ const IModalElement = SensenPluginElement<SensenPluginModalState>({
 
     appearance:{
 
-        ...IModalAppearence
+        ...ModalAppearence
         
     },
 
@@ -52,9 +138,25 @@ const IModalElement = SensenPluginElement<SensenPluginModalState>({
 
         element.$emitter?.listen<SensenModalElement>('done', ({ emit })=>{
 
-            const $overlay = PluginChild(emit, 'overlay')
+            PluginChild(emit, 'underlay');
+            
+            const $overlay = PluginChild(emit, 'overlay');
 
-            console.warn('$>', emit, $overlay )
+            const observer = new MutationObserver((records)=>{
+
+                if(records){ emit.WhenMutationsDetected(records) }
+                
+            })
+
+            observer.observe($overlay, {
+                
+                subtree: true,
+                
+                childList: true,
+
+            });
+            
+            emit.BuildParameters()
 
         })
 
@@ -81,8 +183,10 @@ export default function SensenPluginModal(content : any, parameter? : SensenPlug
     parameter = parameter || {} as SensenPluginModalParameter;
 
     parameter.host = parameter.host || document.body;
+
+    parameter.locked = typeof parameter.locked == 'boolean' ? parameter.locked : true ;
     
-    // $host.append(`<sense-modal>${ content }</sense-modal>`)
+    
 
     const modal = SensenPlugin<SensenPluginModalState>('modal')
 
@@ -92,26 +196,104 @@ export default function SensenPluginModal(content : any, parameter? : SensenPlug
 
         modal.$assign('Open', ()=>{
 
+            const $this = modal as SensenModalElement
             
-            modal.ontransitionend  = ()=>{
-                
-                console.log('Open Done', modal)
-                
-                modal.ontransitionend = null
+            $this.ontransitionend  = ()=>{
+
+                $this.ontransitionend = null
                 
             }
 
+            parameter?.host?.appendChild($this)
             
-            modal.setAttribute('ui-fx', 'transition');
+            $this.setAttribute('ui-fx', 'transition');
 
-            modal.setAttribute('fx-global', '');
+            $this.setAttribute('fx-global', '');
     
-            parameter?.host?.appendChild(modal)
-        
+            $this.SetContent(content);
 
-            setTimeout(()=> modal.setAttribute('plugin:status', '1') , 60)
 
-            return modal;
+            setTimeout(()=> $this.setAttribute('plugin:status', '1') , 60)
+
+            return $this
+            
+        })
+
+
+
+        modal.$assign('WhenMutationsDetected', (records : MutationRecord[])=>{
+
+            const $this = modal as SensenModalElement
+
+            const $closer = GetPluginChild($this, 'modalClose')
+
+            records.map(record=>{
+
+                if(record.target instanceof HTMLElement){
+
+                    const $closers = record.target.querySelectorAll(`[modal\\:action="@close"]`)
+
+                    $closers.forEach(closer=> closer.addEventListener('click', ()=>$this.Close() ) )
+                    
+                }
+
+            })
+
+
+            document.querySelectorAll(`*`).forEach(child=>{
+
+                if(child instanceof HTMLElement){ child.$modal = $this; }
+
+            })
+            
+            return $this
+            
+        })
+
+
+
+        modal.$assign('BuildParameters', ()=>{
+
+            const $this = modal as SensenModalElement
+            
+            const $underlay = PluginChild($this, 'underlay');
+
+            if(parameter?.locked === true){
+    
+                $underlay.addEventListener('click', ()=>{ $this.Close(); })
+
+            }
+
+            return $this
+            
+        })
+
+
+
+        modal.$assign('SetContent', (content : any)=>{
+
+            const $this = modal as SensenModalElement
+            
+            const $overlay = PluginChild($this, 'overlay');
+
+
+            if(typeof content  == 'string'){
+
+                $overlay.innerHTML = content;
+
+            }
+
+            else{
+
+                if(typeof content == 'object'){
+
+                    $overlay.appendChild( content );
+                    
+                }
+                
+            }
+
+            return $this
             
         })
 
@@ -119,7 +301,18 @@ export default function SensenPluginModal(content : any, parameter? : SensenPlug
 
         modal.$assign('Close', ()=>{
 
-            console.log('Close', modal)
+            const $this = modal as SensenModalElement
+
+            $this.ontransitionend  = ()=>{
+
+                $this.parentNode?.removeChild($this)
+                
+                $this.ontransitionend = null
+                
+            }
+            
+            $this.setAttribute('plugin:status', '0')
+            
 
         })
 
@@ -130,4 +323,3 @@ export default function SensenPluginModal(content : any, parameter? : SensenPlug
     return undefined
 
 }
-
