@@ -1,0 +1,19 @@
+{
+  "name": "sensen-plugin-modal",
+  "version": "0.0.2",
+  "description": "a sensen modal handler",
+  "main": "index.js",
+  "author": "G.Y. Yannick",
+  "license": "MIT",
+  "dependencies": {},
+  "scripts": {
+    "watch": "tsc -watch",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "sensen-jutsu": "^0.0.91",
+    "sensen-plugin-element": "^0.0.1",
+    "typescript": "^4.6.2"
+  }
+}
