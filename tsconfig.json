@@ -23,7 +23,6 @@
   "include": [
     "**/*",
     "./node_modules/sensen-jutsu/framework.d.ts", 
-    "./node_modules/sensen-plugin-element/**/*",
   ],
 
   "exclude": [
