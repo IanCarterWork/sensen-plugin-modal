@@ -1,10 +1,19 @@
+import { SensenAppearance } from "sensen-jutsu/appearance";
 import { SensenPluginExtended } from "sensen-jutsu/plugin";
+/**
+ * Sensen Plugin Modal
+ * use `$use()` method to initialize the modal element.
+ *
+ * use `@sensen-modal` as value of `plug:bind` on HTML Element to bind modal methods on `$plugin` property on current HTML element.
+ */
 export default class SensenPluginModal extends SensenPluginExtended {
     constructor(props) {
         super(props);
         this.$identity = '@sensen-modal';
         this.$hostOverflow = {};
         this.$hostComputed = {};
+        this.$apparence = new SensenAppearance();
+        this.$apparence.selectors(SensenModalAppearence).mount().bind(this);
         this.$props = props || {};
         this.$props.host = this.$props?.host || document.body;
         this.$underlay = document.createElement('div');
@@ -128,95 +137,71 @@ export default class SensenPluginModal extends SensenPluginExtended {
     }
 }
 SensenPluginModal.$name = 'plugin-modal';
-export class ModalNavigation {
-    static Start() {
-    }
-    static Stop() {
-    }
-}
-/*
-export const ModalAppearence : TAppearanceProps = {
-
-    $self:{
-
-        position: 'fixed',
-
-        zIndex: '910',
-
-        backgroundColor: 'var(--color-layer-rgb-big)',
-        
-
-    },
-
-
-
-    '&, &[plugin\\:status="0"]': {
-
-        transform: 'translateY(100%)',
-
-        opacity: '0.0',
-    },
-
-
-
-    '&, &[plugin\\:status="1"]': {
-
-        transform: 'translateY(0%)',
-
-        opacity: '1',
-    },
-
-
-    '[plugin-child="@overlay"]': {
-        
-        opacity: '0.0',
-
-        transform: 'translateY(10%)',
-
-    },
-
-
-
-    '&[plugin\\:status="1"] [plugin-child="@overlay"]' : {
-        
-        opacity: '1',
-
-        transitionDelay: 'calc( var(--fx-duration) - ( var(--fx-duration) / 90 ) )',
-        
-        transform: 'translateY(0%)',
-
-    },
-
-
-
-    '&, [plugin-child="@underlay"]' : {
-
-        display: 'flex',
-    
-        justifyContent: 'center',
-    
-        alignItems: 'center',
-    
-        flexDirection: 'column',
-
-        top: '0',
-        
-        left: '0',
-
-        width: '100vw',
-    
-        height: '100vh',
-    
-    },
-
-
-    '[plugin-child="@underlay"]' : {
-
-        position: 'absolute'
-
-    }
-
-
-}
-
+/**
+ * Sensen Plugin Modal Methods Abilities
  */
+export function SensenModalAbilities(statement) {
+    return {
+        modal($) {
+            if (statement && $ && $.record && $.record.node instanceof HTMLElement) {
+                const slug = $.record.node.getAttribute('modal-slug') || undefined;
+                if (slug) {
+                    const entry = statement[slug];
+                    if (typeof entry == 'function') {
+                        const host = $.record.node.getAttribute(`modal-host`);
+                        const title = $.record.node.getAttribute(`modal-title`) || '';
+                        const locked = $.record.node.getAttribute(`modal-locked`);
+                        const content = entry.apply($.element.$methods, [$]);
+                        const modal = SensenPluginModal.Open(content, {
+                            iD: slug,
+                            host: document.querySelector(host),
+                            title,
+                            locked: locked ? true : false
+                        });
+                        // console.log('Open Modal', modal)
+                    }
+                }
+            }
+        }
+    };
+}
+/**
+ * Sensen Modal Apprearance
+ */
+export const SensenModalAppearence = {
+    $self: {
+        position: 'fixed',
+        zIndex: '910',
+        backgroundColor: 'var(--color-layer-rgb-big)',
+    },
+    '&, &[plugin\\:status="0"]': {
+        transform: 'translateY(100%)',
+        opacity: '0.0',
+    },
+    '&[plugin\\:status="1"]': {
+        transform: 'translateY(0%)',
+        opacity: '1',
+    },
+    '[plugin-child="@overlay"]': {
+        opacity: '0.0',
+        transform: 'translateY(10%)',
+    },
+    '&[plugin\\:status="1"] [plugin-child="@overlay"]': {
+        opacity: '1',
+        transitionDelay: 'calc( var(--fx-duration) - ( var(--fx-duration) / 90 ) )',
+        transform: 'translateY(0%)',
+    },
+    '&, [plugin-child="@underlay"]': {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column',
+        top: '0',
+        left: '0',
+        width: '100vw',
+        height: '100vh',
+    },
+    '[plugin-child="@underlay"]': {
+        position: 'absolute'
+    }
+};

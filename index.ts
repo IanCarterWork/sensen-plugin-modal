@@ -1,6 +1,5 @@
 
-import { SensenEmitter } from "sensen-jutsu/emitter";
-
+import { SensenAppearance } from "sensen-jutsu/appearance";
 import { SensenPluginExtended } from "sensen-jutsu/plugin"
 
 
@@ -29,7 +28,12 @@ export type SensenPluginModalHostOverflow = {
 }
 
 
-
+/**
+ * Sensen Plugin Modal
+ * use `$use()` method to initialize the modal element.
+ * 
+ * use `@sensen-modal` as value of `plug:bind` on HTML Element to bind modal methods on `$plugin` property on current HTML element.
+ */
 export default class SensenPluginModal extends SensenPluginExtended<SensenPluginModalProps>{
 
 
@@ -46,13 +50,15 @@ export default class SensenPluginModal extends SensenPluginExtended<SensenPlugin
     
     $hostComputed : CSSStyleDeclaration = {} as CSSStyleDeclaration
 
-    
+    $apparence = new SensenAppearance()
 
 
     constructor(props?: SensenPluginModalProps){
 
         super(props);
 
+        
+        this.$apparence.selectors(SensenModalAppearence).mount().bind(this)
 
         this.$props = props || {} as SensenPluginModalProps
 
@@ -341,24 +347,76 @@ export default class SensenPluginModal extends SensenPluginExtended<SensenPlugin
 
 
 
-export class ModalNavigation {
 
+ export type ModalAbilitiesStatement<T> = {
 
-    static Start(){
-
-        
-        
-    }
+    [P : string] : (dependencies : ComponentRenderDependencies<T>) => string | Node;
     
+}
+
+
+
+/**
+ * Sensen Plugin Modal Methods Abilities
+ */
+
+
+
+export function SensenModalAbilities<T extends SensenElementState>(
+
+    statement ?: ModalAbilitiesStatement<T>
     
+){
 
 
-    static Stop(){
+    return {
 
+        modal($){
 
+            if( statement && $ &&  $.record && $.record.node instanceof HTMLElement ){
+
+                const slug = $.record.node.getAttribute('modal-slug') || undefined;
+                
+                if(slug){
+
+                    const entry = statement[ slug ];
+
+                    if(typeof entry == 'function'){
+
+                        const host = $.record.node.getAttribute(`modal-host`)
+
+                        const title = $.record.node.getAttribute(`modal-title`) || '';
+
+                        const locked = $.record.node.getAttribute(`modal-locked`)
+
+                        const content = entry.apply($.element.$methods, [$]);
+
+                        const modal = SensenPluginModal.Open(content,{
+
+                            iD: slug,
+
+                            host: document.querySelector(host as string) as HTMLElement,
+
+                            title,
+
+                            locked: locked ? true : false
+                                                        
+                        })
+                        
+
+                        // console.log('Open Modal', modal)
+                        
+                    }
+
+                }
+                
+
+            }
+
+        }
         
-    }
-    
+    } as SensenElementMethods<T> | undefined
+
     
 }
 
@@ -366,8 +424,13 @@ export class ModalNavigation {
 
 
 
-/* 
-export const ModalAppearence : TAppearanceProps = {
+
+
+/**
+ * Sensen Modal Apprearance
+ */
+
+export const SensenModalAppearence : TAppearanceProps = {
 
     $self:{
 
@@ -391,7 +454,7 @@ export const ModalAppearence : TAppearanceProps = {
 
 
 
-    '&, &[plugin\\:status="1"]': {
+    '&[plugin\\:status="1"]': {
 
         transform: 'translateY(0%)',
 
@@ -450,8 +513,6 @@ export const ModalAppearence : TAppearanceProps = {
 
 
 }
-
- */
 
 
 

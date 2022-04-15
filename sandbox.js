@@ -1,4 +1,5 @@
 import SensenPluginModal from "./index";
+SensenPluginModal.$use();
 window.addEventListener('load', () => {
     document.body.querySelectorAll('[js-open-modal]').forEach((btn) => {
         btn.addEventListener('click', () => {

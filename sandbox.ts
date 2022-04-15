@@ -1,6 +1,8 @@
 import SensenPluginModal from "./index"
 
 
+SensenPluginModal.$use();
+
 
 window.addEventListener('load', () => {
 
