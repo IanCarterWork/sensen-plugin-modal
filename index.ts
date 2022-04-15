@@ -7,6 +7,23 @@ import { SensenPluginExtended } from "sensen-jutsu/plugin"
 
 
 
+
+export type ModalAbilitiesStatement<T> = {
+
+    slots ?: ModalAbilitiesSlots<T>
+    
+}
+
+
+
+export type ModalAbilitiesSlots<T> = {
+
+    [P : string] : (dependencies : ComponentRenderDependencies<T>) => string | Node;
+    
+}
+
+
+
 export type SensenPluginModalProps = SensenPluginExtendedProps & {
 
     iD?: string;
@@ -364,15 +381,6 @@ export default class SensenPluginModal extends SensenPluginExtended<SensenPlugin
 
 
 
-
- export type ModalAbilitiesStatement<T> = {
-
-    [P : string] : (dependencies : ComponentRenderDependencies<T>) => string | Node;
-    
-}
-
-
-
 /**
  * Sensen Plugin Modal Methods Abilities
  */
@@ -387,13 +395,13 @@ export function SensenModalAbilities<T extends SensenElementState>(
 
         modal($){
 
-            if( statement && $ &&  $.record && $.record.node instanceof HTMLElement ){
+            if( statement && statement.slots && $ &&  $.record && $.record.node instanceof HTMLElement ){
 
-                const slug = $.record.node.getAttribute('modal-slug') || undefined;
+                const slot = ($.record.node.getAttribute('modal-slot') || undefined) as keyof ModalAbilitiesSlots<T>;
                 
-                if(slug){
+                if(slot){
 
-                    const entry = statement[ slug ];
+                    const entry = statement.slots[ slot ];
 
                     if(typeof entry == 'function'){
 
@@ -407,9 +415,9 @@ export function SensenModalAbilities<T extends SensenElementState>(
 
                         const content = entry.apply($.element.$methods, [$]);
 
-                        const modal = SensenPluginModal.Open(content,{
+                        return SensenPluginModal.Open(content,{
 
-                            iD: slug,
+                            iD: slot as string,
 
                             host: document.querySelector(host as string) as HTMLElement,
 
@@ -420,9 +428,6 @@ export function SensenModalAbilities<T extends SensenElementState>(
                             color,
                                                         
                         })
-                        
-
-                        // console.log('Open Modal', modal)
                         
                     }
 

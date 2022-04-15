@@ -149,24 +149,23 @@ SensenPluginModal.$name = 'plugin-modal';
 export function SensenModalAbilities(statement) {
     return {
         modal($) {
-            if (statement && $ && $.record && $.record.node instanceof HTMLElement) {
-                const slug = $.record.node.getAttribute('modal-slug') || undefined;
-                if (slug) {
-                    const entry = statement[slug];
+            if (statement && statement.slots && $ && $.record && $.record.node instanceof HTMLElement) {
+                const slot = ($.record.node.getAttribute('modal-slot') || undefined);
+                if (slot) {
+                    const entry = statement.slots[slot];
                     if (typeof entry == 'function') {
                         const host = $.record.node.getAttribute(`modal-host`);
                         const title = $.record.node.getAttribute(`modal-title`) || '';
                         const locked = $.record.node.getAttribute(`modal-locked`);
                         const color = $.record.node.getAttribute(`modal-color`) || '';
                         const content = entry.apply($.element.$methods, [$]);
-                        const modal = SensenPluginModal.Open(content, {
-                            iD: slug,
+                        return SensenPluginModal.Open(content, {
+                            iD: slot,
                             host: document.querySelector(host),
                             title,
                             locked: locked ? true : false,
                             color,
                         });
-                        // console.log('Open Modal', modal)
                     }
                 }
             }
