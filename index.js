@@ -20,8 +20,14 @@ export default class SensenPluginModal extends SensenPluginExtended {
         this.$overlay = document.createElement('div');
         this.$underlay.setAttribute(`plugin-child`, '@underlay');
         this.$overlay.setAttribute(`plugin-child`, '@overlay');
+        this.$setColor(props?.color);
         this.appendChild(this.$underlay);
         this.appendChild(this.$overlay);
+    }
+    $setColor(color) {
+        if (color) {
+            this.style.backgroundColor = color;
+        }
     }
     $render() {
         return this.$initProps().$initEmitters();
@@ -151,12 +157,14 @@ export function SensenModalAbilities(statement) {
                         const host = $.record.node.getAttribute(`modal-host`);
                         const title = $.record.node.getAttribute(`modal-title`) || '';
                         const locked = $.record.node.getAttribute(`modal-locked`);
+                        const color = $.record.node.getAttribute(`modal-color`) || '';
                         const content = entry.apply($.element.$methods, [$]);
                         const modal = SensenPluginModal.Open(content, {
                             iD: slug,
                             host: document.querySelector(host),
                             title,
-                            locked: locked ? true : false
+                            locked: locked ? true : false,
+                            color,
                         });
                         // console.log('Open Modal', modal)
                     }

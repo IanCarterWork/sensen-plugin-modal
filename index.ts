@@ -16,6 +16,8 @@ export type SensenPluginModalProps = SensenPluginExtendedProps & {
     locked?: boolean;
 
     host?: HTMLElement;
+
+    color?: string;
     
 }
 
@@ -77,6 +79,7 @@ export default class SensenPluginModal extends SensenPluginExtended<SensenPlugin
         this.$overlay.setAttribute(`plugin-child`, '@overlay')
 
 
+        this.$setColor(props?.color)
         
 
         this.appendChild(this.$underlay)
@@ -85,6 +88,20 @@ export default class SensenPluginModal extends SensenPluginExtended<SensenPlugin
         
     }
 
+
+
+
+    $setColor(color ?: string){
+
+        if(color){
+
+            this.style.backgroundColor = color;
+            
+        }
+        
+    }
+    
+    
 
 
     $render(){
@@ -359,9 +376,6 @@ export default class SensenPluginModal extends SensenPluginExtended<SensenPlugin
 /**
  * Sensen Plugin Modal Methods Abilities
  */
-
-
-
 export function SensenModalAbilities<T extends SensenElementState>(
 
     statement ?: ModalAbilitiesStatement<T>
@@ -389,6 +403,8 @@ export function SensenModalAbilities<T extends SensenElementState>(
 
                         const locked = $.record.node.getAttribute(`modal-locked`)
 
+                        const color = $.record.node.getAttribute(`modal-color`) || '';
+
                         const content = entry.apply($.element.$methods, [$]);
 
                         const modal = SensenPluginModal.Open(content,{
@@ -399,7 +415,9 @@ export function SensenModalAbilities<T extends SensenElementState>(
 
                             title,
 
-                            locked: locked ? true : false
+                            locked: locked ? true : false,
+
+                            color,
                                                         
                         })
                         
