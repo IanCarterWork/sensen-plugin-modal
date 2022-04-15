@@ -1,6 +1,6 @@
 {
   "name": "sensen-plugin-modal",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "a sensen modal handler",
   "main": "index.js",
   "author": "G.Y. Yannick",
